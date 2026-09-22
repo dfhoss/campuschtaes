@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organograma - Campus Chapecó</title>
+
+    <!-- Biblioteca PapaParse para leitura do CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        /* =========================
+           CABEÇALHO
+        ========================= */
+
+        header {
+            background: linear-gradient(135deg, #0f3d68, #1266a8);
+            color: white;
+            padding: 28px 40px;
+            box-shadow: 0 4px 12px rgba(15, 61, 104, 0.15);
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 15px;
+        }
+
+        /* =========================
+           CONTAINER
+        ========================= */
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 25px;
+        }
+
+        /* =========================
+           INDICADORES
+        ========================= */
+
+        .indicadores {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .indicador {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .indicador .titulo {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .indicador .valor {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0f3d68;
+        }
+
+        /* =========================
+           BARRA DE FERRAMENTAS
+        ========================= */
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .busca {
+            flex: 1;
+            max-width: 450px;
+        }
+
+        .busca input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .busca input:focus {
+            border-color: #1266a8;
+            box-shadow: 0 0 0 3px rgba(18, 102, 168, 0.15);
+        }
+
+        .acoes {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #0f3d68;
+            color: white;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1266a8;
+        }
+
+        /* =========================
+           ÁREA DO ORGANOGRAMA
+        ========================= */
+
+        .organograma-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px 20px;
+            min-height: 550px;
+            overflow-x: auto;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .organograma {
+            display: inline-flex;
+            justify-content: center;
+            min-width: 100%;
+            padding: 10px 20px;
+        }
+
+        /* =========================
+           ÁRVORE HIERÁRQUICA
+        ========================= */
+
+        .tree {
+            display: inline-flex;
+            justify-content: center;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .tree, .tree ul {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            padding-left: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .tree ul {
+            padding-top: 25px;
+            gap: 25px;
+        }
+
+        .tree li {
+            list-style: none;
+            text-align: center;
+            position: relative;
+            padding: 25px 8px 0 8px;
+        }
+
+        /* Linha vertical superior para nós comuns */
+        .tree li::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 25px;
+            background: #94a3b8;
+        }
+
+        /* Remove a linha vertical no topo do nó Raiz (CAMPUS CHAPECÓ) */
+        .tree > li {
+            padding-top: 0;
+        }
+        .tree > li::before {
+            display: none;
+        }
+
+        /* Linha horizontal entre irmãos */
+        .tree li:not(:only-child)::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #94a3b8;
+        }
+
+        .tree li:first-child::after {
+            left: 50%;
+        }
+
+        .tree li:last-child::after {
+            right: 50%;
+        }
+
+        .tree li:only-child::after {
+            display: none;
+        }
+
+        /* =========================
+           CARTÕES DAS UNIDADES
+        ========================= */
+
+        .unidade {
+            width: 230px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-top: 5px solid #1266a8;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+            margin: 0 auto;
+        }
+
+        .unidade:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+            border-color: #1266a8;
+        }
+
+        /* Estilo Exclusivo do Nó Principal (CAMPUS CHAPECÓ) */
+        .unidade.principal {
+            width: 300px;
+            background: linear-gradient(135deg, #0f3d68, #1e40af);
+            color: white;
+            border: 2px solid #082a49;
+            border-top: 6px solid #fbbf24;
+            box-shadow: 0 8px 20px rgba(15, 61, 104, 0.25);
+            padding: 20px 18px;
+        }
+
+        .unidade.principal:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 28px rgba(15, 61, 104, 0.35);
+        }
+
+        .sigla-unidade {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1266a8;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.6px;
+        }
+
+        .principal .sigla-unidade {
+            color: #fef08a;
+            font-size: 12px;
+        }
+
+        .nome-unidade {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.35;
+            word-wrap: break-word;
+        }
+
+        .principal .nome-unidade {
+            font-size: 17px;
+            margin-bottom: 14px;
+        }
+
+        .colaboradores {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 22px;
+            font-weight: 800;
+            color: #1266a8;
+        }
+
+        .principal .colaboradores {
+            color: #ffffff;
+            font-size: 26px;
+        }
+
+        .legenda {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .principal .legenda {
+            color: #dbeafe;
+        }
+
+        .expandir-btn {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            font-size: 12px;
+            color: #64748b;
+            padding: 4px 7px;
+            border-radius: 4px;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .expandir-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .principal .expandir-btn {
+            color: white;
+        }
+
+        .principal .expandir-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .encontrado .unidade {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+        }
+
+        /* =========================
+           MODAL / POP-UP
+        ========================= */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.ativo {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            animation: modalEntrada 0.2s ease-out;
+        }
+
+        @keyframes modalEntrada {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #f8fafc;
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #0f3d68;
+        }
+
+        .modal-header .subtitulo {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .modal-close {
+            background: transparent;
+            color: #64748b;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 6px;
+            border-radius: 6px;
+        }
+
+        .modal-close:hover {
+            color: #0f172a;
+            background: #e2e8f0;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .lista-servidores {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item-servidor {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .item-servidor:last-child {
+            border-bottom: none;
+        }
+
+        .item-servidor:hover {
+            background: #f8fafc;
+        }
+
+        .icone-servidor {
+            color: #1266a8;
+            font-size: 16px;
+        }
+
+        .vazio-msg {
+            text-align: center;
+            color: #94a3b8;
+            padding: 30px 0;
+            font-style: italic;
+        }
+
+        /* =========================
+           RODAPÉ
+        ========================= */
+
+        .rodape {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            padding: 25px;
+        }
+
+        @media (max-width: 800px) {
+            header { padding: 22px; }
+            header h1 { font-size: 23px; }
+            .container { padding: 15px; }
+            .indicadores { grid-template-columns: 1fr; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .busca { max-width: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Organograma Administrativo</h1>
+    <p>Estrutura organizacional e distribuição de servidores — Campus Chapecó</p>
+</header>
+
+<div class="container">
+
+    <!-- INDICADORES -->
+    <section class="indicadores">
+        <div class="indicador">
+            <div class="titulo">Total de Unidades</div>
+            <div class="valor" id="totalUnidades">0</div>
+        </div>
+
+        <div class="indicador">
+            <div class="titulo">Total de Servidores</div>
+            <div class="valor" id="totalColaboradores">0</div>
+        </div>
+
+        <div class="indicador">
+            <div class="titulo">Unidades Subordinadas</div>
+            <div class="valor" id="totalDepartamentos">0</div>
+        </div>
+    </section>
+
+    <!-- FERRAMENTAS -->
+    <div class="toolbar">
+        <div class="busca">
+            <input type="text" id="campoBusca" placeholder="🔎 Pesquisar unidade ou servidor...">
+        </div>
+
+        <div class="acoes">
+            <button onclick="expandirTodos()">Expandir tudo</button>
+            <button onclick="recolherTodos()">Recolher tudo</button>
+        </div>
+    </div>
+
+    <!-- ORGANOGRAMA -->
+    <section class="organograma-container">
+        <div id="organograma" class="organograma">
+            <p style="text-align: center; color: #64748b; padding: 40px;">Carregando organograma...</p>
+        </div>
+    </section>
+
+</div>
+
+<!-- POP-UP (MODAL DE SERVIDORES) -->
+<div class="modal-overlay" id="modalServidores">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h3 id="modalNomeUnidade">Nome da Unidade</h3>
+                <div class="subtitulo" id="modalSubtitulo">Lista de servidores lotados</div>
+            </div>
+            <button class="modal-close" onclick="fecharModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalConteudo">
+            <!-- Conteúdo dinâmico -->
+        </div>
+    </div>
+</div>
+
+<div class="rodape">
+    Organograma de Servidores — Campus Chapecó
+</div>
+
+<!-- BASE DE DADOS EMBUTIDA (Garante funcionamento automático mesmo sem servidor HTTP) -->
+<script id="dadosCsvEmbutidos" type="text/csv">
+nome_ascii;id_unidade;sigla_unidade;unidade;hierarquia;id_unidade_responsavel;sigla_unidade_responsavel;unidade_responsavel;nivel
+LILIAN CARLA SIMIONI;348;ASCOM - CH;ASSESSORIA DE COMUNICAÇÃO - CHAPECÓ;.605.118.348.;118;CCH;CAMPUS CHAPECÓ;1
+CLAUDIA CRISTINA DE OLIVEIRA SOARES;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+CLAUDIA FELISBINO;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+ELISANGELA RIBAS DOS SANTOS;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+IVAN RAMOS;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+JEFERSON RODRIGUES DE LIMA;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+LUIZ CARLOS SORDI;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+NAIARA LETICIA VALENTINI;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+ROCHIANE DOS ANJOS;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+ROZILENE BELLAVER;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
+CLADIS JULIANA LUTINSKI;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;.605.118.119.;118;CCH;CAMPUS CHAPECÓ;1
+DENIS ANISIO SOCORRO CARVALHO;347;SEDOC - CH;SECRETARIA DE DIREÇÃO E ÓRGÃOS COLEGIADOS - CHAPECÓ;.605.118.347.;118;CCH;CAMPUS CHAPECÓ;1
+GIOVANA SANTOS DA SILVA;347;SEDOC - CH;SECRETARIA DE DIREÇÃO E ÓRGÃOS COLEGIADOS - CHAPECÓ;.605.118.347.;118;CCH;CAMPUS CHAPECÓ;1
+MARCEL EDUARD ARMANINI;347;SEDOC - CH;SECRETARIA DE DIREÇÃO E ÓRGÃOS COLEGIADOS - CHAPECÓ;.605.118.347.;118;CCH;CAMPUS CHAPECÓ;1
+ANIELE LOPES DA SILVA;353;ASSAC - CH;ASSESSORIA ACADÊMICA - CAMPUS CHAPECÓ;.605.118.120.353.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+MARCELLO SAVIO DE SOUZA;353;ASSAC - CH;ASSESSORIA ACADÊMICA - CAMPUS CHAPECÓ;.605.118.120.353.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+RANGEL MORRISSEY MANTELLI;353;ASSAC - CH;ASSESSORIA ACADÊMICA - CAMPUS CHAPECÓ;.605.118.120.353.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+DANIELE ROHR;355;BIB - CH;ASSESSORIA DE BIBLIOTECA - CHAPECÓ;.605.118.120.355.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+JACIR GAIO;355;BIB - CH;ASSESSORIA DE BIBLIOTECA - CHAPECÓ;.605.118.120.355.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+LILIAN MADEIRA DE CASTRO E SILVA;355;BIB - CH;ASSESSORIA DE BIBLIOTECA - CHAPECÓ;.605.118.120.355.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+LOIVO ANTONIO LEMES;355;BIB - CH;ASSESSORIA DE BIBLIOTECA - CHAPECÓ;.605.118.120.355.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+MARCIO FABIANO COMACHIO;355;BIB - CH;ASSESSORIA DE BIBLIOTECA - CHAPECÓ;.605.118.120.355.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+TIAGO DANIEL DE JESUS COSTA;355;BIB - CH;ASSESSORIA DE BIBLIOTECA - CHAPECÓ;.605.118.120.355.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ALANA ZAMONER SBARAINI;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ATILA WILLIAMS DE SOUSA FONSECA;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+DANIEL AFONSO NUNES ZAIRE;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+DOUGLAS FELIPE HOSS;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+JEAN CARLO RODIO;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+JULIANA ALVES PEREIRA;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+LUCIANA DE DAVID PARISOTTO;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+MARCO ANTONIO ARTEIRO;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+MATHEUS LANG WUSTRO;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+RODRIGO CELSO GHENO;357;ASSGAS - CH;ASSESSORIA DE GESTÃO, ADMINISTRAÇÃO E SERVIÇOS - CHAPECÓ;.605.118.119.357.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ANDREIA DO PRADO BUENO;358;ASSGP - CH;ASSESSORIA DE GESTÃO DE PESSOAS - CHAPECÓ;.605.118.119.358.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ELIEL CARLOS ROSA PLACIDO;358;ASSGP - CH;ASSESSORIA DE GESTÃO DE PESSOAS - CHAPECÓ;.605.118.119.358.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+LEONARDO CORREIA NASCIMENTO DE SIQUEIRA;358;ASSGP - CH;ASSESSORIA DE GESTÃO DE PESSOAS - CHAPECÓ;.605.118.119.358.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ALLANN CRYSTYANN WAGNER FANK ANDRADE;359;ASSINFR - CH;ASSESSORIA DE INFRAESTRUTURA E GESTÃO AMBIENTAL - CHAPECÓ;.605.118.119.359.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+MARCELO GUERREIRO CRIZEL;359;ASSINFR - CH;ASSESSORIA DE INFRAESTRUTURA E GESTÃO AMBIENTAL - CHAPECÓ;.605.118.119.359.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ROSANA LAMPUGNANI;359;ASSINFR - CH;ASSESSORIA DE INFRAESTRUTURA E GESTÃO AMBIENTAL - CHAPECÓ;.605.118.119.359.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+DIEGO DE SOUZA BOENO;360;ASSLOS - CH;ASSESSORIA DE LOGÍSTICA E SUPRIMENTOS - CHAPECÓ;.605.118.119.360.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ELISE CRISTINA EIDT;360;ASSLOS - CH;ASSESSORIA DE LOGÍSTICA E SUPRIMENTOS - CHAPECÓ;.605.118.119.360.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+GESIEL FRAGOZO POMPEO;360;ASSLOS - CH;ASSESSORIA DE LOGÍSTICA E SUPRIMENTOS - CHAPECÓ;.605.118.119.360.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+JAQUELINE DA SILVA OLIVEIRA;360;ASSLOS - CH;ASSESSORIA DE LOGÍSTICA E SUPRIMENTOS - CHAPECÓ;.605.118.119.360.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+ANA CLAUDIA LARA CRIZEL;361;ASSPLAN - CH;ASSESSORIA DE PLANEJAMENTO - CHAPECÓ;.605.118.119.361.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+JOSE VALCI PEREIRA RIOS;361;ASSPLAN - CH;ASSESSORIA DE PLANEJAMENTO - CHAPECÓ;.605.118.119.361.;119;ADM - CH;COORDENAÇÃO ADMINISTRATIVA - CHAPECÓ;2
+DARIANE CARLESSO;1048;ASSP  - CH;ASSESSORIA PEDAGÓGICA - CHAPECÓ;.605.118.120.1048.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+EDSON DA SILVA;354;CAAEX - CH;COORDENAÇÃO ADJUNTA DE ÁREAS EXPERIMENTAIS - CHAPECÓ;.605.118.120.354.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+LUCIANO PESSOA DE ALMEIDA;354;CAAEX - CH;COORDENAÇÃO ADJUNTA DE ÁREAS EXPERIMENTAIS - CHAPECÓ;.605.118.120.354.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+FLAVIA AIGNER PAN;1132;CAEC - CH;COORDENAÇÃO ADJUNTA DE EXTENSÃO E CULTURA - CHAPECÓ;.605.118.120.1132.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ANGELA APARECIDA DOS SANTOS DE ALMEIDA;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+CAROLINE ZARZZEKA;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+DANIELA VARNIER;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ELIANE MARINES BRAATZ IMLAU;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+FILOMENA MARAFON;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+FRANCIELI BRUSCO DA SILVA;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+GUSTAVO BLOEMER;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+JONAS GOLDONI;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+KERLI MARIA DA CRUZ;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+LUIZ GUSTAVO ECCO;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ODINEI FOGOLARI;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+RODRIGO RODRIGUES;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+TIAGO BOLDRIN;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+TIAGO DANIEL DE BRAGA;349;CLAB - CH;COORDENAÇÃO ADJUNTA DE LABORATÓRIOS - CHAPECÓ;.605.118.120.349.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+LUCIANO ADILIO ALVES;350;CAPPG - CH;COORDENAÇÃO ADJUNTA DE PESQUISA E PÓS-GRADUAÇÃO - CHAPECÓ;.605.118.120.350.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+MARCOS EUGENIO FRANCESCHI;350;CAPPG - CH;COORDENAÇÃO ADJUNTA DE PESQUISA E PÓS-GRADUAÇÃO - CHAPECÓ;.605.118.120.350.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ANA PAULA PRAISSLER;351;SECAC - CH;SECRETARIA ACADÊMICA - CHAPECÓ;.605.118.120.351.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+DANIELA PEDERIVA;351;SECAC - CH;SECRETARIA ACADÊMICA - CHAPECÓ;.605.118.120.351.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+DEISI STANGHERLIN;351;SECAC - CH;SECRETARIA ACADÊMICA - CHAPECÓ;.605.118.120.351.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+JACQUELINE FONSECA COUTINHO;351;SECAC - CH;SECRETARIA ACADÊMICA - CHAPECÓ;.605.118.120.351.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+JOSIANA SALETE KEMPKA;351;SECAC - CH;SECRETARIA ACADÊMICA - CHAPECÓ;.605.118.120.351.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ANA CLAUDIA ARENHART;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ANDERSON DOMINGOS BATISTELA;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+CHRISTIANE FRAGA RAMOS PIRES NONATO;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+DULCE MARIA DI MARE;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+EDENILSON LUZ DA SILVA;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+GUSTAVO SCHEVCHENCO ANTUNES DA SILVA SCZEPANINK;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+OZIEL FRAGOZO POMPEO;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+RICARDO OSMAR VOSS;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+SILVANIA CABREIRA;352;SEGEC - CH;SECRETARIA GERAL DE CURSOS - CHAPECÓ;.605.118.120.352.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+AGUINALDO SOARES TERESCHUK;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ANDERSON JOSE GUISOLPHI;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+AULICON TONATTO;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+CESAR CAPITANIO;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+CRISTIAN RENATO VON BORSTEL;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+RAQUEL DE SOUZA RODRIGUES;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+SILVANA LUCIA RODRIGUES ECCO;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+SUELEN GEMELLI DE MELLO;1129;SECPGR;SECRETARIA GERAL DE PÓS-GRADUAÇÃO E RESIDÊNCIAS - CAMPUS CHAPECÓ;.605.118.120.1129.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+AMANDA TRINDADE CASTRO DA SILVA;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH;.605.118.120.356.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+ANA VICTORIA GOMES DA SILVA;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH;.605.118.120.356.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+LARISSA BRAND BACK;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH;.605.118.120.356.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+MAYRA EUGENIO RODRIGUES ALEBRANTE;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH;.605.118.120.356.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+MICHELE BATISTA;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH;.605.118.120.356.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
+</script>
+
+<script>
+/*
+=====================================================
+ESTRUTURA DE DADOS E VARIÁVEIS GLOBAIS
+=====================================================
+*/
+let dadosOrganograma = null;
+let contadorIds = 0;
+
+/*
+=====================================================
+INICIALIZAÇÃO AUTOMÁTICA
+=====================================================
+*/
+window.addEventListener("DOMContentLoaded", () => {
+    // Tenta carregar o ficheiro remoto caso esteja rodando num servidor web
+    fetch("servidores_full.csv")
+        .then(response => {
+            if (!response.ok) throw new Error("Usando dados embutidos.");
+            return response.text();
+        })
+        .then(csvTexto => {
+            parsearCSV(csvTexto);
+        })
+        .catch(() => {
+            // Se aberto diretamente do computador (file://), lê da tag embutida automaticamente
+            const csvEmbutido = document.getElementById("dadosCsvEmbutidos").textContent;
+            parsearCSV(csvEmbutido);
+        });
+});
+
+/*
+=====================================================
+PARSE E CONSTRUÇÃO HIERÁRQUICA DO CSV
+=====================================================
+*/
+function parsearCSV(csvConteudo) {
+    Papa.parse(csvConteudo.trim(), {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        complete: function(results) {
+            if (results.data && results.data.length > 0) {
+                processarRegistos(results.data);
+            }
+        }
+    });
+}
+
+function processarRegistos(rows) {
+    const nodesMap = {};
+
+    rows.forEach(row => {
+        const getVal = (possibleKeys) => {
+            for (let key of Object.keys(row)) {
+                if (possibleKeys.includes(key.trim().toLowerCase())) {
+                    return row[key] !== undefined && row[key] !== null ? String(row[key]).trim() : '';
+                }
+            }
+            return '';
+        };
+
+        const servidor = getVal(['nome_ascii', 'nome', 'servidor', 'funcionario']);
+        const u_id = getVal(['id_unidade', 'idunidade']);
+        const u_sigla = getVal(['sigla_unidade', 'siglaunidade', 'sigla']);
+        const u_nome = getVal(['unidade', 'nome_unidade']);
+
+        const p_id = getVal(['id_unidade_responsavel', 'idunidaderesponsavel', 'id_pai']);
+        const p_sigla = getVal(['sigla_unidade_responsavel', 'siglaunidaderesponsavel', 'sigla_pai']);
+        const p_nome = getVal(['unidade_responsavel', 'unidaderesponsavel', 'nome_pai']);
+
+        if (!u_id && !p_id) return;
+
+        // Cria/atualiza o nó Pai
+        if (p_id) {
+            if (!nodesMap[p_id]) {
+                nodesMap[p_id] = {
+                    id: p_id,
+                    sigla: p_sigla || p_id,
+                    nome: p_nome || p_id,
+                    id_responsavel: null,
+                    servidores: [],
+                    filhos: []
+                };
+            } else {
+                if (p_sigla && !nodesMap[p_id].sigla) nodesMap[p_id].sigla = p_sigla;
+                if (p_nome && !nodesMap[p_id].nome) nodesMap[p_id].nome = p_nome;
+            }
+        }
+
+        // Cria/atualiza o nó Atual
+        if (u_id) {
+            if (!nodesMap[u_id]) {
+                nodesMap[u_id] = {
+                    id: u_id,
+                    sigla: u_sigla || u_id,
+                    nome: u_nome || u_id,
+                    id_responsavel: p_id || null,
+                    servidores: [],
+                    filhos: []
+                };
+            } else {
+                if (p_id) nodesMap[u_id].id_responsavel = p_id;
+                if (u_sigla) nodesMap[u_id].sigla = u_sigla;
+                if (u_nome) nodesMap[u_id].nome = u_nome;
+            }
+
+            if (servidor) {
+                nodesMap[u_id].servidores.push(servidor);
+            }
+        }
+    });
+
+    // Encadeia os nós
+    const roots = [];
+    Object.keys(nodesMap).forEach(id => {
+        const node = nodesMap[id];
+        const p_id = node.id_responsavel;
+
+        if (p_id && nodesMap[p_id] && p_id !== id) {
+            nodesMap[p_id].filhos.push(node);
+        } else {
+            roots.push(node);
+        }
+    });
+
+    dadosOrganograma = (roots.length === 1) ? roots[0] : {
+        id: 'root',
+        sigla: 'GERAL',
+        nome: 'Organização',
+        id_responsavel: null,
+        servidores: [],
+        filhos: roots
+    };
+
+    renderizar();
+    calcularIndicadores();
+    centralizarOrganograma();
+}
+
+/*
+=====================================================
+RENDERIZAÇÃO E CENTRALIZAÇÃO DO ORGANOGRAMA
+=====================================================
+*/
+function criarUnidadeElemento(unidade, nivel = 0) {
+    const li = document.createElement("li");
+    li.dataset.nome = (unidade.nome + " " + unidade.sigla).toLowerCase();
+    li.dataset.servidores = (unidade.servidores || []).join(" ").toLowerCase();
+
+    const card = document.createElement("div");
+    card.className = "unidade";
+    if (nivel === 0) {
+        card.classList.add("principal");
+    }
+
+    const id = "unidade-" + contadorIds++;
+    card.dataset.id = id;
+
+    const temFilhos = unidade.filhos && unidade.filhos.length > 0;
+    const simboloExpandir = temFilhos ? `<span class="expandir-btn">▼</span>` : "";
+
+    const totalServidores = unidade.servidores ? unidade.servidores.length : 0;
+
+    card.innerHTML = `
+        ${simboloExpandir}
+        <div class="sigla-unidade">${unidade.sigla}</div>
+        <div class="nome-unidade">${unidade.nome}</div>
+        <div class="colaboradores">👥 ${totalServidores}</div>
+        <div class="legenda">servidores lotados</div>
+    `;
+
+    card.addEventListener("click", function(event) {
+        if (event.target.classList.contains("expandir-btn")) {
+            event.stopPropagation();
+            const ul = li.querySelector(":scope > ul");
+            if (ul) {
+                const aberto = ul.style.display !== "none";
+                ul.style.display = aberto ? "none" : "flex";
+                event.target.textContent = aberto ? "▶" : "▼";
+                centralizarOrganograma();
+            }
+            return;
+        }
+
+        abrirModalServidores(unidade);
+    });
+
+    li.appendChild(card);
+
+    if (temFilhos) {
+        const ul = document.createElement("ul");
+        unidade.filhos.forEach(filho => {
+            const filhoElemento = criarUnidadeElemento(filho, nivel + 1);
+            ul.appendChild(filhoElemento);
+        });
+        li.appendChild(ul);
+    }
+
+    return li;
+}
+
+function renderizar() {
+    const container = document.getElementById("organograma");
+    container.innerHTML = "";
+
+    if (!dadosOrganograma) return;
+
+    contadorIds = 0;
+    const tree = document.createElement("ul");
+    tree.className = "tree";
+
+    tree.appendChild(criarUnidadeElemento(dadosOrganograma));
+    container.appendChild(tree);
+}
+
+function centralizarOrganograma() {
+    setTimeout(() => {
+        const container = document.querySelector('.organograma-container');
+        if (container) {
+            container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+        }
+    }, 100);
+}
+
+/*
+=====================================================
+POP-UP / MODAL DE SERVIDORES
+=====================================================
+*/
+function abrirModalServidores(unidade) {
+    const modal = document.getElementById("modalServidores");
+    const titulo = document.getElementById("modalNomeUnidade");
+    const subtitulo = document.getElementById("modalSubtitulo");
+    const conteudo = document.getElementById("modalConteudo");
+
+    titulo.textContent = `[${unidade.sigla}] ${unidade.nome}`;
+    
+    const servidores = unidade.servidores || [];
+    subtitulo.textContent = `Total: ${servidores.length} servidor(es) diretamente lotado(s)`;
+
+    if (servidores.length === 0) {
+        conteudo.innerHTML = `<div class="vazio-msg">Nenhum servidor diretamente lotado nesta unidade.</div>`;
+    } else {
+        let htmlLista = `<ul class="lista-servidores">`;
+        servidores.forEach(s => {
+            htmlLista += `
+                <li class="item-servidor">
+                    <span class="icone-servidor">👤</span>
+                    <span><strong>${escapeHtml(s)}</strong></span>
+                </li>
+            `;
+        });
+        htmlLista += `</ul>`;
+        conteudo.innerHTML = htmlLista;
+    }
+
+    modal.classList.add("ativo");
+}
+
+function fecharModal() {
+    document.getElementById("modalServidores").classList.remove("ativo");
+}
+
+window.addEventListener("click", function(e) {
+    const modal = document.getElementById("modalServidores");
+    if (e.target === modal) {
+        fecharModal();
+    }
+});
+
+window.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        fecharModal();
+    }
+});
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+/*
+=====================================================
+INDICADORES
+=====================================================
+*/
+function obterTodasUnidades(unidade) {
+    let resultado = [unidade];
+    if (unidade.filhos) {
+        unidade.filhos.forEach(filho => {
+            resultado = resultado.concat(obterTodasUnidades(filho));
+        });
+    }
+    return resultado;
+}
+
+function calcularIndicadores() {
+    if (!dadosOrganograma) return;
+
+    const unidades = obterTodasUnidades(dadosOrganograma);
+
+    document.getElementById("totalUnidades").textContent = unidades.length;
+
+    const totalServidores = unidades.reduce((soma, u) => soma + (u.servidores ? u.servidores.length : 0), 0);
+    document.getElementById("totalColaboradores").textContent = totalServidores;
+
+    document.getElementById("totalDepartamentos").textContent = dadosOrganograma.filhos ? dadosOrganograma.filhos.length : 0;
+}
+
+/*
+=====================================================
+EXPANDIR, RECOLHER E PESQUISAR
+=====================================================
+*/
+function expandirTodos() {
+    document.querySelectorAll(".tree ul").forEach(ul => ul.style.display = "flex");
+    document.querySelectorAll(".expandir-btn").forEach(btn => btn.textContent = "▼");
+    centralizarOrganograma();
+}
+
+function recolherTodos() {
+    document.querySelectorAll(".tree li ul").forEach(ul => ul.style.display = "none");
+    document.querySelectorAll(".expandir-btn").forEach(btn => btn.textContent = "▶");
+    centralizarOrganograma();
+}
+
+document.getElementById("campoBusca").addEventListener("input", function() {
+    const termo = this.value.toLowerCase().trim();
+    const itens = document.querySelectorAll(".tree li");
+
+    itens.forEach(item => item.classList.remove("encontrado"));
+
+    if (!termo) return;
+
+    itens.forEach(item => {
+        const nome = item.dataset.nome || "";
+        const servidores = item.dataset.servidores || "";
+
+        if (nome.includes(termo) || servidores.includes(termo)) {
+            item.classList.add("encontrado");
+
+            let pai = item.parentElement?.closest("li");
+            while (pai) {
+                const ul = pai.querySelector(":scope > ul");
+                if (ul) ul.style.display = "flex";
+                pai = pai.parentElement?.closest("li");
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
