@@ -1,192 +1,867 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Organograma Administrativo — Campus Chapecó</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-*{box-sizing:border-box}
-:root{
-  --azul:#0f3d68;--azul2:#1266a8;--azul3:#eaf3fa;--amarelo:#fbbf24;
-  --bg:#f4f7fa;--card:#fff;--texto:#172b3a;--muted:#64748b;--borda:#e2e8f0;
-  --suave:#f8fafc;--sombra:0 8px 24px rgba(15,61,104,.07);
-}
-body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--texto)}
-button,input{font:inherit}
-button{cursor:pointer}
-.header{background:linear-gradient(120deg,#0b3458,#1266a8);color:#fff}
-.header-inner{max-width:1500px;margin:auto;padding:28px 34px;display:flex;align-items:center;justify-content:space-between;gap:25px}
-.brand{display:flex;gap:16px;align-items:center}
-.brand-mark{width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:24px;border:1px solid rgba(255,255,255,.18)}
-.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;opacity:.72;font-weight:700}
-h1{font-size:27px;margin:3px 0 5px;letter-spacing:-.4px}
-.header p{margin:0;color:#dbeafe;font-size:14px}
-.header-badge{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);padding:9px 13px;border-radius:10px;font-size:12px}
-.container{max-width:1500px;margin:auto;padding:25px 34px 45px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
-.stat{background:#fff;border:1px solid var(--borda);border-radius:15px;padding:18px 20px;display:flex;align-items:center;gap:15px;box-shadow:var(--sombra)}
-.stat-icon{width:42px;height:42px;border-radius:11px;background:var(--azul3);display:grid;place-items:center;font-size:19px}
-.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
-.stat-value{font-size:27px;font-weight:800;color:var(--azul);margin-top:2px}
-.toolbar{display:flex;gap:12px;align-items:center;margin-bottom:13px;position:relative}
-.search-wrap{flex:1;position:relative}
-.search-wrap input{width:100%;height:48px;border:1px solid var(--borda);border-radius:12px;padding:0 17px 0 45px;background:#fff;outline:none;box-shadow:0 3px 12px rgba(0,0,0,.03)}
-.search-wrap input:focus{border-color:#77a9cc;box-shadow:0 0 0 4px rgba(18,102,168,.1)}
-.search-icon-main{position:absolute;left:16px;top:14px;color:#7b8b99}
-.search-results{display:none;position:absolute;z-index:50;top:56px;left:0;right:0;background:#fff;border:1px solid var(--borda);border-radius:13px;box-shadow:0 15px 35px rgba(15,23,42,.15);padding:8px;max-height:450px;overflow:auto}
-.search-results.visivel{display:block}
-.search-summary{font-size:11px;color:var(--muted);padding:8px 10px;text-transform:uppercase;font-weight:700}
-.search-result{width:100%;border:0;background:#fff;display:grid;grid-template-columns:28px 1fr 20px;text-align:left;gap:8px;padding:10px;border-radius:9px;color:var(--texto)}
-.search-result:hover{background:var(--suave)}
-.search-result small,.search-result strong{display:block}
-.search-result small{font-size:11px;color:var(--muted);margin-top:2px}
-.search-empty{padding:22px;text-align:center;color:var(--muted);font-size:13px}
-.view-toggle{display:flex;background:#e8eef4;border-radius:11px;padding:3px}
-.view-toggle button{border:0;background:transparent;padding:10px 14px;border-radius:8px;color:#53677a;font-size:13px;font-weight:700}
-.view-toggle button.ativo{background:#fff;color:var(--azul);box-shadow:0 2px 7px rgba(0,0,0,.07)}
-.quick-actions{display:flex;gap:7px}
-.quick-actions button{border:1px solid var(--borda);background:#fff;color:var(--azul);padding:10px 13px;border-radius:10px;font-size:12px;font-weight:700}
-.quick-actions button:hover{background:var(--azul3)}
-.breadcrumb{display:flex;align-items:center;gap:5px;min-height:31px;margin:3px 0 12px;overflow:auto}
-.crumb{border:0;background:transparent;color:#617588;font-size:12px;font-weight:700;padding:4px 5px;white-space:nowrap}
-.crumb.ativo{color:var(--azul)}
-.crumb-sep{color:#a1afbb}
-.main-panel{background:#fff;border:1px solid var(--borda);border-radius:17px;box-shadow:var(--sombra);padding:24px;min-height:520px}
-.context-panel{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:18px 20px;border-radius:14px;background:linear-gradient(120deg,#f6faff,#fff);border:1px solid #e3edf5;margin-bottom:22px}
-.context-kicker,.section-kicker{font-size:11px;color:var(--azul2);font-weight:800;text-transform:uppercase;letter-spacing:.8px}
-.context-panel h2,.list-head h2{font-size:20px;margin:4px 0 4px;color:var(--azul)}
-.context-panel p{margin:0;color:var(--muted);font-size:12px}
-.context-total{text-align:right;min-width:160px}
-.context-total strong{display:block;font-size:27px;color:var(--azul)}
-.context-total span{font-size:11px;color:var(--muted)}
-.nav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:15px}
-.nav-card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:17px;min-height:168px;text-align:left;transition:.18s;position:relative;box-shadow:0 3px 10px rgba(15,61,104,.035)}
-.nav-card:hover{transform:translateY(-2px);border-color:#9fc1d9;box-shadow:0 10px 24px rgba(15,61,104,.09)}
-.nav-card-top{display:flex;justify-content:space-between;align-items:center}
-.nav-sigla{font-size:11px;font-weight:800;color:var(--azul2);letter-spacing:.5px}
-.nav-arrow{font-size:23px;color:#91a4b5;line-height:1}
-.nav-card h3{font-size:14px;line-height:1.35;margin:12px 0 17px;color:#263b4c;min-height:38px}
-.nav-card-metrics{display:flex;gap:16px;font-size:11px;color:var(--muted);padding-bottom:13px;border-bottom:1px solid #edf1f4}
-.nav-card-metrics strong{font-size:15px;color:var(--azul);margin-right:3px}
-.nav-card-footer{display:flex;justify-content:space-between;gap:8px;margin-top:11px;font-size:10px;color:#8292a0}
-.abrir-label{font-weight:800;color:var(--azul2)}
-.direct-panel{margin-top:22px;padding:15px 17px;border:1px dashed #bfd1df;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:15px;background:#fbfdff}
-.direct-panel h3{margin:4px 0 0;font-size:14px}
-.primary-action,.secondary-action{border:0;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:800}
-.primary-action{background:var(--azul);color:#fff}
-.secondary-action{background:var(--azul3);color:var(--azul)}
-.empty-state{text-align:center;padding:65px 20px;color:var(--muted)}
-.empty-icon{font-size:35px}
-.empty-state h3{color:var(--azul);margin:10px 0 6px}
-.empty-state p{font-size:13px;margin-bottom:17px}
-.list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.list-count{font-size:12px;color:var(--muted);background:var(--suave);padding:8px 11px;border-radius:8px}
-.unit-list{border:1px solid var(--borda);border-radius:12px;overflow:hidden}
-.unit-row{width:100%;display:grid;grid-template-columns:120px 1fr 130px 25px;gap:12px;align-items:center;text-align:left;background:#fff;border:0;border-bottom:1px solid #edf1f4;padding:13px 15px;color:var(--texto)}
-.unit-row:last-child{border-bottom:0}
-.unit-row:hover{background:#f8fbfd}
-.unit-row-sigla{font-size:11px;font-weight:800;color:var(--azul2)}
-.unit-row-name{font-size:13px}
-.unit-row-count{font-size:11px;color:var(--muted);text-align:right}
-.unit-row-arrow{font-size:20px;color:#91a4b5;text-align:right}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(8,25,42,.62);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.ativo{display:flex}
-.modal{width:min(680px,100%);max-height:82vh;background:#fff;border-radius:17px;box-shadow:0 25px 60px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column}
-.modal-header{padding:20px 22px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;gap:15px;background:#fbfdff}
-.modal-header h3{margin:0;color:var(--azul);font-size:17px;line-height:1.3}
-.modal-header .subtitulo{font-size:12px;color:var(--muted);margin-top:5px}
-.modal-close{border:0;background:#eef3f7;color:#607383;width:34px;height:34px;border-radius:9px;font-size:22px}
-.modal-body{padding:8px 18px 18px;overflow:auto}
-.lista-servidores{list-style:none;margin:0;padding:0}
-.item-servidor{display:flex;align-items:center;gap:11px;padding:12px 8px;border-bottom:1px solid #edf1f4;font-size:13px}
-.item-servidor:last-child{border-bottom:0}
-.icone-servidor{width:29px;height:29px;border-radius:50%;background:var(--azul3);display:grid;place-items:center;font-size:13px}
-.vazio-msg{text-align:center;color:var(--muted);padding:30px}
-.footer{text-align:center;padding:25px;color:#8292a0;font-size:11px}
-@media(max-width:900px){
- .header-inner{padding:22px 18px}.header-badge{display:none}.container{padding:18px 15px 35px}
- .stats{grid-template-columns:1fr}.toolbar{flex-wrap:wrap}.search-wrap{flex-basis:100%}
- .main-panel{padding:15px}.context-panel{align-items:flex-start;flex-direction:column}
- .context-total{text-align:left}.unit-row{grid-template-columns:95px 1fr 80px 20px}
-}
-@media(max-width:600px){
- h1{font-size:22px}.quick-actions{display:none}.view-toggle button{padding:9px 10px}
- .nav-grid{grid-template-columns:1fr}.unit-row{grid-template-columns:1fr 55px 20px}
- .unit-row-sigla{grid-column:1/2}.unit-row-name{grid-column:1/2}.unit-row-count{grid-column:2/3;grid-row:1/3}
- .unit-row-arrow{grid-column:3;grid-row:1/3}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organograma Administrativo — Campus Chapecó</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        :root {
+            --azul: #00693e;
+            --azul2: #008751;
+            --azul3: #eaf5ef;
+            --verde-escuro: #00351f;
+            --amarelo: #fbbf24;
+            --bg: #f2f6f3;
+            --card: #fff;
+            --texto: #1a2e22;
+            --muted: #5f7567;
+            --borda: #d4e2d9;
+            --suave: #f6faf7;
+            --sombra: 0 8px 24px rgba(0, 53, 31, .07);
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--texto)
+        }
+
+        button,
+        input {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        .header {
+            background: linear-gradient(120deg, #00351f, #00693e);
+            color: #fff
+        }
+
+        .header-inner {
+            max-width: 1500px;
+            margin: auto;
+            padding: 28px 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px
+        }
+
+        .brand {
+            display: flex;
+            gap: 16px;
+            align-items: center
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, .14);
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            border: 1px solid rgba(255, 255, 255, .18)
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            opacity: .72;
+            font-weight: 700
+        }
+
+        h1 {
+            font-size: 27px;
+            margin: 3px 0 5px;
+            letter-spacing: -.4px
+        }
+
+        .header p {
+            margin: 0;
+            color: #d1fae5;
+            font-size: 14px
+        }
+
+        .header-badge {
+            border: 1px solid rgba(255, 255, 255, .2);
+            background: rgba(255, 255, 255, .09);
+            padding: 9px 13px;
+            border-radius: 10px;
+            font-size: 12px
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: auto;
+            padding: 25px 34px 45px
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px
+        }
+
+        .stat {
+            background: #fff;
+            border: 1px solid var(--borda);
+            border-radius: 15px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--sombra)
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: var(--azul3);
+            display: grid;
+            place-items: center;
+            font-size: 19px
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            color: var(--muted);
+            font-weight: 700
+        }
+
+        .stat-value {
+            font-size: 27px;
+            font-weight: 800;
+            color: var(--azul);
+            margin-top: 2px
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 13px;
+            position: relative
+        }
+
+        .search-wrap {
+            flex: 1;
+            position: relative
+        }
+
+        .search-wrap input {
+            width: 100%;
+            height: 48px;
+            border: 1px solid var(--borda);
+            border-radius: 12px;
+            padding: 0 17px 0 45px;
+            background: #fff;
+            outline: none;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .03)
+        }
+
+        .search-wrap input:focus {
+            border-color: #77b895;
+            box-shadow: 0 0 0 4px rgba(0, 105, 62, .12)
+        }
+
+        .search-icon-main {
+            position: absolute;
+            left: 16px;
+            top: 14px;
+            color: #7b9986
+        }
+
+        .search-results {
+            display: none;
+            position: absolute;
+            z-index: 50;
+            top: 56px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid var(--borda);
+            border-radius: 13px;
+            box-shadow: 0 15px 35px rgba(0, 53, 31, .15);
+            padding: 8px;
+            max-height: 450px;
+            overflow: auto
+        }
+
+        .search-results.visivel {
+            display: block
+        }
+
+        .search-summary {
+            font-size: 11px;
+            color: var(--muted);
+            padding: 8px 10px;
+            text-transform: uppercase;
+            font-weight: 700
+        }
+
+        .search-result {
+            width: 100%;
+            border: 0;
+            background: #fff;
+            display: grid;
+            grid-template-columns: 28px 1fr 20px;
+            text-align: left;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 9px;
+            color: var(--texto)
+        }
+
+        .search-result:hover {
+            background: var(--suave)
+        }
+
+        .search-result small,
+        .search-result strong {
+            display: block
+        }
+
+        .search-result small {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        .search-empty {
+            padding: 22px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #e5eee8;
+            border-radius: 11px;
+            padding: 3px
+        }
+
+        .view-toggle button {
+            border: 0;
+            background: transparent;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #537a62;
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .view-toggle button.ativo {
+            background: #fff;
+            color: var(--azul);
+            box-shadow: 0 2px 7px rgba(0, 0, 0, .07)
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 7px
+        }
+
+        .quick-actions button {
+            border: 1px solid var(--borda);
+            background: #fff;
+            color: var(--azul);
+            padding: 10px 13px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700
+        }
+
+        .quick-actions button:hover {
+            background: var(--azul3)
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 31px;
+            margin: 3px 0 12px;
+            overflow: auto
+        }
+
+        .crumb {
+            border: 0;
+            background: transparent;
+            color: #618870;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 5px;
+            white-space: nowrap
+        }
+
+        .crumb.ativo {
+            color: var(--azul)
+        }
+
+        .crumb-sep {
+            color: #a1bba9
+        }
+
+        .main-panel {
+            background: #fff;
+            border: 1px solid var(--borda);
+            border-radius: 17px;
+            box-shadow: var(--sombra);
+            padding: 24px;
+            min-height: 520px
+        }
+
+        .context-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            padding: 18px 20px;
+            border-radius: 14px;
+            background: linear-gradient(120deg, #f4faf6, #fff);
+            border: 1px solid #d8eadd;
+            margin-bottom: 22px
+        }
+
+        .context-kicker,
+        .section-kicker {
+            font-size: 11px;
+            color: var(--azul2);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .8px
+        }
+
+        .context-panel h2,
+        .list-head h2 {
+            font-size: 20px;
+            margin: 4px 0 4px;
+            color: var(--azul)
+        }
+
+        .context-panel p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .context-total {
+            text-align: right;
+            min-width: 160px
+        }
+
+        .context-total strong {
+            display: block;
+            font-size: 27px;
+            color: var(--azul)
+        }
+
+        .context-total span {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+            gap: 15px
+        }
+
+        .nav-card {
+            background: #fff;
+            border: 1px solid var(--borda);
+            border-radius: 14px;
+            padding: 17px;
+            min-height: 168px;
+            text-align: left;
+            transition: .18s;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0, 53, 31, .035)
+        }
+
+        .nav-card:hover {
+            transform: translateY(-2px);
+            border-color: #9fd9b5;
+            box-shadow: 0 10px 24px rgba(0, 53, 31, .1)
+        }
+
+        .nav-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .nav-sigla {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--azul2);
+            letter-spacing: .5px
+        }
+
+        .nav-arrow {
+            font-size: 23px;
+            color: #91b59f;
+            line-height: 1
+        }
+
+        .nav-card h3 {
+            font-size: 14px;
+            line-height: 1.35;
+            margin: 12px 0 17px;
+            color: #264c36;
+            min-height: 38px
+        }
+
+        .nav-card-metrics {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            color: var(--muted);
+            padding-bottom: 13px;
+            border-bottom: 1px solid #edf4ef
+        }
+
+        .nav-card-metrics strong {
+            font-size: 15px;
+            color: var(--azul);
+            margin-right: 3px
+        }
+
+        .nav-card-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 11px;
+            font-size: 10px;
+            color: #82a08f
+        }
+
+        .abrir-label {
+            font-weight: 800;
+            color: var(--azul2)
+        }
+
+        .direct-panel {
+            margin-top: 22px;
+            padding: 15px 17px;
+            border: 1px dashed #bfdfcb;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            background: #fbfdfc
+        }
+
+        .direct-panel h3 {
+            margin: 4px 0 0;
+            font-size: 14px
+        }
+
+        .primary-action,
+        .secondary-action {
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 800
+        }
+
+        .primary-action {
+            background: var(--azul);
+            color: #fff
+        }
+
+        .secondary-action {
+            background: var(--azul3);
+            color: var(--azul)
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 65px 20px;
+            color: var(--muted)
+        }
+
+        .empty-icon {
+            font-size: 35px
+        }
+
+        .empty-state h3 {
+            color: var(--azul);
+            margin: 10px 0 6px
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            margin-bottom: 17px
+        }
+
+        .list-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px
+        }
+
+        .list-count {
+            font-size: 12px;
+            color: var(--muted);
+            background: var(--suave);
+            padding: 8px 11px;
+            border-radius: 8px
+        }
+
+        .unit-list {
+            border: 1px solid var(--borda);
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        .unit-row {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 120px 1fr 130px 25px;
+            gap: 12px;
+            align-items: center;
+            text-align: left;
+            background: #fff;
+            border: 0;
+            border-bottom: 1px solid #edf4ef;
+            padding: 13px 15px;
+            color: var(--texto)
+        }
+
+        .unit-row:last-child {
+            border-bottom: 0
+        }
+
+        .unit-row:hover {
+            background: #f8fdfa
+        }
+
+        .unit-row-sigla {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--azul2)
+        }
+
+        .unit-row-name {
+            font-size: 13px
+        }
+
+        .unit-row-count {
+            font-size: 11px;
+            color: var(--muted);
+            text-align: right
+        }
+
+        .unit-row-arrow {
+            font-size: 20px;
+            color: #91b59f;
+            text-align: right
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 35, 20, .65);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px
+        }
+
+        .modal-overlay.ativo {
+            display: flex
+        }
+
+        .modal {
+            width: min(680px, 100%);
+            max-height: 82vh;
+            background: #fff;
+            border-radius: 17px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, .25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column
+        }
+
+        .modal-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--borda);
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            background: #fbfdfc
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--azul);
+            font-size: 17px;
+            line-height: 1.3
+        }
+
+        .modal-header .subtitulo {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px
+        }
+
+        .modal-close {
+            border: 0;
+            background: #eef7f2;
+            color: #60836e;
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            font-size: 22px
+        }
+
+        .modal-body {
+            padding: 8px 18px 18px;
+            overflow: auto
+        }
+
+        .lista-servidores {
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        .item-servidor {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 12px 8px;
+            border-bottom: 1px solid #edf4ef;
+            font-size: 13px
+        }
+
+        .item-servidor:last-child {
+            border-bottom: 0
+        }
+
+        .icone-servidor {
+            width: 29px;
+            height: 29px;
+            border-radius: 50%;
+            background: var(--azul3);
+            display: grid;
+            place-items: center;
+            font-size: 13px
+        }
+
+        .vazio-msg {
+            text-align: center;
+            color: var(--muted);
+            padding: 30px
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #8292a0;
+            font-size: 11px
+        }
+
+        @media(max-width:900px) {
+            .header-inner {
+                padding: 22px 18px
+            }
+
+            .header-badge {
+                display: none
+            }
+
+            .container {
+                padding: 18px 15px 35px
+            }
+
+            .stats {
+                grid-template-columns: 1fr
+            }
+
+            .toolbar {
+                flex-wrap: wrap
+            }
+
+            .search-wrap {
+                flex-basis: 100%
+            }
+
+            .main-panel {
+                padding: 15px
+            }
+
+            .context-panel {
+                align-items: flex-start;
+                flex-direction: column
+            }
+
+            .context-total {
+                text-align: left
+            }
+
+            .unit-row {
+                grid-template-columns: 95px 1fr 80px 20px
+            }
+        }
+
+        @media(max-width:600px) {
+            h1 {
+                font-size: 22px
+            }
+
+            .quick-actions {
+                display: none
+            }
+
+            .view-toggle button {
+                padding: 9px 10px
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr
+            }
+
+            .unit-row {
+                grid-template-columns: 1fr 55px 20px
+            }
+
+            .unit-row-sigla {
+                grid-column: 1/2
+            }
+
+            .unit-row-name {
+                grid-column: 1/2
+            }
+
+            .unit-row-count {
+                grid-column: 2/3;
+                grid-row: 1/3
+            }
+
+            .unit-row-arrow {
+                grid-column: 3;
+                grid-row: 1/3
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<header class="header">
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-mark">🏛️</div>
-      <div>
-        <div class="eyebrow">Estrutura organizacional</div>
-        <h1>Organograma Administrativo</h1>
-        <p>Distribuição de unidades e servidores — Campus Chapecó</p>
-      </div>
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-mark">🏛️</div>
+                <div>
+                    <div class="eyebrow">Estrutura organizacional</div>
+                    <h1>Organograma Administrativo</h1>
+                    <p>Distribuição de unidades e servidores — Campus Chapecó</p>
+                </div>
+            </div>
+            <div class="header-badge">CAMPUS CHAPECÓ</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="stats">
+            <div class="stat">
+                <div class="stat-icon">🏢</div>
+                <div>
+                    <div class="stat-label">Total de unidades</div>
+                    <div class="stat-value" id="totalUnidades">0</div>
+                </div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">👥</div>
+                <div>
+                    <div class="stat-label">Total de servidores</div>
+                    <div class="stat-value" id="totalColaboradores">0</div>
+                </div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">🗂️</div>
+                <div>
+                    <div class="stat-label">Áreas principais</div>
+                    <div class="stat-value" id="totalDepartamentos">0</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon-main">🔎</span>
+                <input type="text" id="campoBusca" autocomplete="off"
+                    placeholder="Pesquisar servidor, unidade ou sigla...">
+                <div id="resultadosBusca" class="search-results"></div>
+            </div>
+            <div class="view-toggle">
+                <button class="ativo" data-view="organograma" onclick="alternarModo('organograma')">🌳
+                    Estrutura</button>
+                <button data-view="lista" onclick="alternarModo('lista')">☷ Lista</button>
+            </div>
+            <div class="quick-actions">
+                <button onclick="expandirTodos()">Expandir</button>
+                <button onclick="recolherTodos()">Recolher</button>
+            </div>
+        </div>
+
+        <div id="breadcrumb" class="breadcrumb"></div>
+
+        <section class="main-panel">
+            <div id="visaoConteudo">
+                <div class="empty-state">
+                    <div class="empty-icon">⏳</div>
+                    <p>Carregando estrutura...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mantém o organograma original no DOM para compatibilidade com as funções existentes. -->
+        <section class="organograma-container" style="display:none">
+            <div id="organograma"></div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="modalServidores">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalNomeUnidade">Nome da Unidade</h3>
+                    <div class="subtitulo" id="modalSubtitulo">Lista de servidores lotados</div>
+                </div>
+                <button class="modal-close" onclick="fecharModal()" aria-label="Fechar">&times;</button>
+            </div>
+            <div class="modal-body" id="modalConteudo"></div>
+        </div>
     </div>
-    <div class="header-badge">CAMPUS CHAPECÓ</div>
-  </div>
-</header>
 
-<main class="container">
-  <section class="stats">
-    <div class="stat"><div class="stat-icon">🏢</div><div><div class="stat-label">Total de unidades</div><div class="stat-value" id="totalUnidades">0</div></div></div>
-    <div class="stat"><div class="stat-icon">👥</div><div><div class="stat-label">Total de servidores</div><div class="stat-value" id="totalColaboradores">0</div></div></div>
-    <div class="stat"><div class="stat-icon">🗂️</div><div><div class="stat-label">Áreas principais</div><div class="stat-value" id="totalDepartamentos">0</div></div></div>
-  </section>
+    <div class="footer">Organograma de Servidores — Campus Chapecó</div>
 
-  <div class="toolbar">
-    <div class="search-wrap">
-      <span class="search-icon-main">🔎</span>
-      <input type="text" id="campoBusca" autocomplete="off" placeholder="Pesquisar servidor, unidade ou sigla...">
-      <div id="resultadosBusca" class="search-results"></div>
-    </div>
-    <div class="view-toggle">
-      <button class="ativo" data-view="organograma" onclick="alternarModo('organograma')">🌳 Estrutura</button>
-      <button data-view="lista" onclick="alternarModo('lista')">☷ Lista</button>
-    </div>
-    <div class="quick-actions">
-      <button onclick="expandirTodos()">Expandir</button>
-      <button onclick="recolherTodos()">Recolher</button>
-    </div>
-  </div>
-
-  <div id="breadcrumb" class="breadcrumb"></div>
-
-  <section class="main-panel">
-    <div id="visaoConteudo">
-      <div class="empty-state"><div class="empty-icon">⏳</div><p>Carregando estrutura...</p></div>
-    </div>
-  </section>
-
-  <!-- Mantém o organograma original no DOM para compatibilidade com as funções existentes. -->
-  <section class="organograma-container" style="display:none">
-    <div id="organograma"></div>
-  </section>
-</main>
-
-<div class="modal-overlay" id="modalServidores">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <h3 id="modalNomeUnidade">Nome da Unidade</h3>
-        <div class="subtitulo" id="modalSubtitulo">Lista de servidores lotados</div>
-      </div>
-      <button class="modal-close" onclick="fecharModal()" aria-label="Fechar">&times;</button>
-    </div>
-    <div class="modal-body" id="modalConteudo"></div>
-  </div>
-</div>
-
-<div class="footer">Organograma de Servidores — Campus Chapecó</div>
-
-<script id="dadosCsvEmbutidos" type="text/csv">
+    <script id="dadosCsvEmbutidos" type="text/csv">
 nome_ascii;id_unidade;sigla_unidade;unidade;hierarquia;id_unidade_responsavel;sigla_unidade_responsavel;unidade_responsavel;nivel
 LILIAN CARLA SIMIONI;348;ASCOM - CH;ASSESSORIA DE COMUNICAÇÃO - CHAPECÓ;.605.118.348.;118;CCH;CAMPUS CHAPECÓ;1
 CLAUDIA CRISTINA DE OLIVEIRA SOARES;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;.605.118.120.;118;CCH;CAMPUS CHAPECÓ;1
@@ -282,85 +957,85 @@ MAYRA EUGENIO RODRIGUES ALEBRANTE;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH
 MICHELE BATISTA;356;SAE - CH;SETOR DE ASSUNTOS ESTUDANTIS - CH;.605.118.120.356.;120;ACAD - CH;COORDENAÇÃO ACADÊMICA - CHAPECÓ;2
 </script>
 
-<script>
-/*
-=====================================================
-ESTRUTURA DE DADOS E VARIÁVEIS GLOBAIS
-=====================================================
-*/
-let dadosOrganograma = null;
-let contadorIds = 0;
+    <script>
+        /*
+        =====================================================
+        ESTRUTURA DE DADOS E VARIÁVEIS GLOBAIS
+        =====================================================
+        */
+        let dadosOrganograma = null;
+        let contadorIds = 0;
 
-/* =====================================================
-   NOVA INTERFACE — navegação, breadcrumb e modo lista
-   ===================================================== */
-let unidadeAtual = null;
-let modoVisualizacao = "organograma";
+        /* =====================================================
+           NOVA INTERFACE — navegação, breadcrumb e modo lista
+           ===================================================== */
+        let unidadeAtual = null;
+        let modoVisualizacao = "organograma";
 
-function atualizarBreadcrumb(unidade) {
-    const el = document.getElementById("breadcrumb");
-    if (!el) return;
+        function atualizarBreadcrumb(unidade) {
+            const el = document.getElementById("breadcrumb");
+            if (!el) return;
 
-    const caminho = [];
-    let atual = unidade;
-    const guard = new Set();
+            const caminho = [];
+            let atual = unidade;
+            const guard = new Set();
 
-    while (atual && !guard.has(atual.id)) {
-        guard.add(atual.id);
-        caminho.unshift(atual);
-        const paiId = atual.id_responsavel;
-        atual = paiId && encontrarUnidade(dadosOrganograma, paiId);
-    }
-
-    el.innerHTML = caminho.map((u, i) => {
-        const ultimo = i === caminho.length - 1;
-        return `<button class="crumb ${ultimo ? "ativo" : ""}" data-id="${escapeHtml(u.id)}">${escapeHtml(u.sigla)}</button>`;
-    }).join('<span class="crumb-sep">›</span>');
-
-    el.querySelectorAll(".crumb").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const u = encontrarUnidade(dadosOrganograma, btn.dataset.id);
-            if (u) {
-                unidadeAtual = u;
-                renderizarVisao();
+            while (atual && !guard.has(atual.id)) {
+                guard.add(atual.id);
+                caminho.unshift(atual);
+                const paiId = atual.id_responsavel;
+                atual = paiId && encontrarUnidade(dadosOrganograma, paiId);
             }
-        });
-    });
-}
 
-function encontrarUnidade(raiz, id) {
-    if (!raiz) return null;
-    if (String(raiz.id) === String(id)) return raiz;
-    for (const filho of (raiz.filhos || [])) {
-        const achado = encontrarUnidade(filho, id);
-        if (achado) return achado;
-    }
-    return null;
-}
+            el.innerHTML = caminho.map((u, i) => {
+                const ultimo = i === caminho.length - 1;
+                return `<button class="crumb ${ultimo ? "ativo" : ""}" data-id="${escapeHtml(u.id)}">${escapeHtml(u.sigla)}</button>`;
+            }).join('<span class="crumb-sep">›</span>');
 
-function obterDescendentes(unidade) {
-    let arr = [];
-    (unidade.filhos || []).forEach(f => {
-        arr.push(f);
-        arr = arr.concat(obterDescendentes(f));
-    });
-    return arr;
-}
+            el.querySelectorAll(".crumb").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const u = encontrarUnidade(dadosOrganograma, btn.dataset.id);
+                    if (u) {
+                        unidadeAtual = u;
+                        renderizarVisao();
+                    }
+                });
+            });
+        }
 
-function totalServidoresArvore(unidade) {
-    return (unidade.servidores || []).length +
-        (unidade.filhos || []).reduce((s, f) => s + totalServidoresArvore(f), 0);
-}
+        function encontrarUnidade(raiz, id) {
+            if (!raiz) return null;
+            if (String(raiz.id) === String(id)) return raiz;
+            for (const filho of (raiz.filhos || [])) {
+                const achado = encontrarUnidade(filho, id);
+                if (achado) return achado;
+            }
+            return null;
+        }
 
-function criarCardNavegacao(unidade, principal = false) {
-    const totalDiretos = (unidade.servidores || []).length;
-    const filhos = unidade.filhos || [];
-    const totalEstrutura = totalServidoresArvore(unidade);
+        function obterDescendentes(unidade) {
+            let arr = [];
+            (unidade.filhos || []).forEach(f => {
+                arr.push(f);
+                arr = arr.concat(obterDescendentes(f));
+            });
+            return arr;
+        }
 
-    const card = document.createElement("article");
-    card.className = "nav-card" + (principal ? " nav-card-principal" : "");
+        function totalServidoresArvore(unidade) {
+            return (unidade.servidores || []).length +
+                (unidade.filhos || []).reduce((s, f) => s + totalServidoresArvore(f), 0);
+        }
 
-    card.innerHTML = `
+        function criarCardNavegacao(unidade, principal = false) {
+            const totalDiretos = (unidade.servidores || []).length;
+            const filhos = unidade.filhos || [];
+            const totalEstrutura = totalServidoresArvore(unidade);
+
+            const card = document.createElement("article");
+            card.className = "nav-card" + (principal ? " nav-card-principal" : "");
+
+            card.innerHTML = `
         <div class="nav-card-top">
             <span class="nav-sigla">${escapeHtml(unidade.sigla)}</span>
             ${filhos.length ? `<span class="nav-arrow">›</span>` : ""}
@@ -376,32 +1051,32 @@ function criarCardNavegacao(unidade, principal = false) {
         </div>
     `;
 
-    card.addEventListener("click", () => {
-        if (filhos.length) {
-            unidadeAtual = unidade;
-            renderizarVisao();
-        } else {
-            abrirModalServidores(unidade);
+            card.addEventListener("click", () => {
+                if (filhos.length) {
+                    unidadeAtual = unidade;
+                    renderizarVisao();
+                } else {
+                    abrirModalServidores(unidade);
+                }
+            });
+
+            return card;
         }
-    });
 
-    return card;
-}
+        function renderizarNavegacao() {
+            const area = document.getElementById("visaoConteudo");
+            if (!area || !dadosOrganograma) return;
 
-function renderizarNavegacao() {
-    const area = document.getElementById("visaoConteudo");
-    if (!area || !dadosOrganograma) return;
+            const unidade = unidadeAtual || dadosOrganograma;
+            area.innerHTML = "";
 
-    const unidade = unidadeAtual || dadosOrganograma;
-    area.innerHTML = "";
+            const filhos = unidade.filhos || [];
+            const totalDiretos = (unidade.servidores || []).length;
+            const totalEstrutura = totalServidoresArvore(unidade);
 
-    const filhos = unidade.filhos || [];
-    const totalDiretos = (unidade.servidores || []).length;
-    const totalEstrutura = totalServidoresArvore(unidade);
-
-    const resumo = document.createElement("div");
-    resumo.className = "context-panel";
-    resumo.innerHTML = `
+            const resumo = document.createElement("div");
+            resumo.className = "context-panel";
+            resumo.innerHTML = `
         <div>
             <div class="context-kicker">${escapeHtml(unidade.sigla)}</div>
             <h2>${escapeHtml(unidade.nome)}</h2>
@@ -412,50 +1087,50 @@ function renderizarNavegacao() {
             <span>servidores na estrutura</span>
         </div>
     `;
-    area.appendChild(resumo);
+            area.appendChild(resumo);
 
-    if (unidade !== dadosOrganograma && filhos.length === 0) {
-        const detalhe = document.createElement("div");
-        detalhe.className = "empty-state";
-        detalhe.innerHTML = `
+            if (unidade !== dadosOrganograma && filhos.length === 0) {
+                const detalhe = document.createElement("div");
+                detalhe.className = "empty-state";
+                detalhe.innerHTML = `
             <div class="empty-icon">👥</div>
             <h3>Unidade sem subordinadas</h3>
             <p>Esta unidade possui ${totalDiretos} servidor(es) diretamente lotado(s).</p>
             <button class="primary-action" id="verServidoresBtn">Ver servidores</button>
         `;
-        detalhe.querySelector("#verServidoresBtn").onclick = () => abrirModalServidores(unidade);
-        area.appendChild(detalhe);
-        return;
-    }
+                detalhe.querySelector("#verServidoresBtn").onclick = () => abrirModalServidores(unidade);
+                area.appendChild(detalhe);
+                return;
+            }
 
-    if (filhos.length) {
-        const grid = document.createElement("div");
-        grid.className = "nav-grid";
-        filhos.forEach((filho, i) => grid.appendChild(criarCardNavegacao(filho, i < 3)));
-        area.appendChild(grid);
-    }
+            if (filhos.length) {
+                const grid = document.createElement("div");
+                grid.className = "nav-grid";
+                filhos.forEach((filho, i) => grid.appendChild(criarCardNavegacao(filho, i < 3)));
+                area.appendChild(grid);
+            }
 
-    if (totalDiretos > 0) {
-        const direct = document.createElement("div");
-        direct.className = "direct-panel";
-        direct.innerHTML = `
+            if (totalDiretos > 0) {
+                const direct = document.createElement("div");
+                direct.className = "direct-panel";
+                direct.innerHTML = `
             <div>
                 <span class="section-kicker">Equipe direta</span>
                 <h3>Servidores lotados nesta unidade</h3>
             </div>
             <button class="secondary-action" id="verEquipeBtn">Ver ${totalDiretos} servidor(es) →</button>
         `;
-        direct.querySelector("#verEquipeBtn").onclick = () => abrirModalServidores(unidade);
-        area.appendChild(direct);
-    }
-}
+                direct.querySelector("#verEquipeBtn").onclick = () => abrirModalServidores(unidade);
+                area.appendChild(direct);
+            }
+        }
 
-function renderizarLista() {
-    const area = document.getElementById("visaoConteudo");
-    if (!area || !dadosOrganograma) return;
+        function renderizarLista() {
+            const area = document.getElementById("visaoConteudo");
+            if (!area || !dadosOrganograma) return;
 
-    const todas = obterTodasUnidades(dadosOrganograma);
-    area.innerHTML = `
+            const todas = obterTodasUnidades(dadosOrganograma);
+            area.innerHTML = `
         <div class="list-head">
             <div>
                 <span class="section-kicker">Visão consolidada</span>
@@ -475,255 +1150,255 @@ function renderizarLista() {
         </div>
     `;
 
-    area.querySelectorAll(".unit-row").forEach(row => {
-        row.addEventListener("click", () => {
-            const u = encontrarUnidade(dadosOrganograma, row.dataset.unitId);
-            if (u) abrirModalServidores(u);
-        });
-    });
-}
+            area.querySelectorAll(".unit-row").forEach(row => {
+                row.addEventListener("click", () => {
+                    const u = encontrarUnidade(dadosOrganograma, row.dataset.unitId);
+                    if (u) abrirModalServidores(u);
+                });
+            });
+        }
 
-function renderizarVisao() {
-    atualizarBreadcrumb(unidadeAtual || dadosOrganograma);
-    if (modoVisualizacao === "lista") renderizarLista();
-    else renderizarNavegacao();
-}
+        function renderizarVisao() {
+            atualizarBreadcrumb(unidadeAtual || dadosOrganograma);
+            if (modoVisualizacao === "lista") renderizarLista();
+            else renderizarNavegacao();
+        }
 
-function alternarModo(modo) {
-    modoVisualizacao = modo;
-    document.querySelectorAll(".view-toggle button").forEach(b => {
-        b.classList.toggle("ativo", b.dataset.view === modo);
-    });
-    renderizarVisao();
-}
+        function alternarModo(modo) {
+            modoVisualizacao = modo;
+            document.querySelectorAll(".view-toggle button").forEach(b => {
+                b.classList.toggle("ativo", b.dataset.view === modo);
+            });
+            renderizarVisao();
+        }
 
-function aplicarBuscaNova(termo) {
-    const resultado = document.getElementById("resultadosBusca");
-    if (!resultado || !dadosOrganograma) return;
+        function aplicarBuscaNova(termo) {
+            const resultado = document.getElementById("resultadosBusca");
+            if (!resultado || !dadosOrganograma) return;
 
-    termo = termo.toLowerCase().trim();
-    if (!termo) {
-        resultado.classList.remove("visivel");
-        resultado.innerHTML = "";
-        return;
-    }
+            termo = termo.toLowerCase().trim();
+            if (!termo) {
+                resultado.classList.remove("visivel");
+                resultado.innerHTML = "";
+                return;
+            }
 
-    const todas = obterTodasUnidades(dadosOrganograma);
-    const achadosUnidades = todas.filter(u =>
-        `${u.nome} ${u.sigla}`.toLowerCase().includes(termo)
-    );
-    const achadosServidores = [];
-    todas.forEach(u => (u.servidores || []).forEach(s => {
-        if (s.toLowerCase().includes(termo)) achadosServidores.push({ servidor: s, unidade: u });
-    }));
+            const todas = obterTodasUnidades(dadosOrganograma);
+            const achadosUnidades = todas.filter(u =>
+                `${u.nome} ${u.sigla}`.toLowerCase().includes(termo)
+            );
+            const achadosServidores = [];
+            todas.forEach(u => (u.servidores || []).forEach(s => {
+                if (s.toLowerCase().includes(termo)) achadosServidores.push({ servidor: s, unidade: u });
+            }));
 
-    const total = achadosUnidades.length + achadosServidores.length;
-    resultado.classList.add("visivel");
+            const total = achadosUnidades.length + achadosServidores.length;
+            resultado.classList.add("visivel");
 
-    if (!total) {
-        resultado.innerHTML = `<div class="search-empty">Nenhum resultado encontrado para <strong>${escapeHtml(termo)}</strong>.</div>`;
-        return;
-    }
+            if (!total) {
+                resultado.innerHTML = `<div class="search-empty">Nenhum resultado encontrado para <strong>${escapeHtml(termo)}</strong>.</div>`;
+                return;
+            }
 
-    let html = `<div class="search-summary">${total} resultado(s) encontrado(s)</div>`;
+            let html = `<div class="search-summary">${total} resultado(s) encontrado(s)</div>`;
 
-    achadosUnidades.slice(0, 8).forEach(u => {
-        html += `<button class="search-result" data-unit-id="${escapeHtml(u.id)}">
+            achadosUnidades.slice(0, 8).forEach(u => {
+                html += `<button class="search-result" data-unit-id="${escapeHtml(u.id)}">
             <span class="search-icon">🏢</span>
             <span><strong>${escapeHtml(u.sigla)}</strong><small>${escapeHtml(u.nome)}</small></span>
             <span>›</span>
         </button>`;
-    });
+            });
 
-    achadosServidores.slice(0, 12).forEach(({servidor, unidade}) => {
-        html += `<button class="search-result" data-server-unit="${escapeHtml(unidade.id)}">
+            achadosServidores.slice(0, 12).forEach(({ servidor, unidade }) => {
+                html += `<button class="search-result" data-server-unit="${escapeHtml(unidade.id)}">
             <span class="search-icon">👤</span>
             <span><strong>${escapeHtml(servidor)}</strong><small>${escapeHtml(unidade.sigla)} · ${escapeHtml(unidade.nome)}</small></span>
             <span>›</span>
         </button>`;
-    });
+            });
 
-    resultado.innerHTML = html;
-    resultado.querySelectorAll("[data-unit-id]").forEach(btn => {
-        btn.onclick = () => {
-            const u = encontrarUnidade(dadosOrganograma, btn.dataset.unitId);
-            if (u) {
-                resultado.classList.remove("visivel");
-                document.getElementById("campoBusca").value = "";
-                unidadeAtual = u;
-                renderizarVisao();
-            }
-        };
-    });
-    resultado.querySelectorAll("[data-server-unit]").forEach(btn => {
-        btn.onclick = () => {
-            const u = encontrarUnidade(dadosOrganograma, btn.dataset.serverUnit);
-            if (u) {
-                resultado.classList.remove("visivel");
-                document.getElementById("campoBusca").value = "";
-                abrirModalServidores(u);
-            }
-        };
-    });
-}
+            resultado.innerHTML = html;
+            resultado.querySelectorAll("[data-unit-id]").forEach(btn => {
+                btn.onclick = () => {
+                    const u = encontrarUnidade(dadosOrganograma, btn.dataset.unitId);
+                    if (u) {
+                        resultado.classList.remove("visivel");
+                        document.getElementById("campoBusca").value = "";
+                        unidadeAtual = u;
+                        renderizarVisao();
+                    }
+                };
+            });
+            resultado.querySelectorAll("[data-server-unit]").forEach(btn => {
+                btn.onclick = () => {
+                    const u = encontrarUnidade(dadosOrganograma, btn.dataset.serverUnit);
+                    if (u) {
+                        resultado.classList.remove("visivel");
+                        document.getElementById("campoBusca").value = "";
+                        abrirModalServidores(u);
+                    }
+                };
+            });
+        }
 
 
-/*
-=====================================================
-INICIALIZAÇÃO AUTOMÁTICA
-=====================================================
-*/
-window.addEventListener("DOMContentLoaded", () => {
-    // Tenta carregar o ficheiro remoto caso esteja rodando num servidor web
-    fetch("servidores_full.csv")
-        .then(response => {
-            if (!response.ok) throw new Error("Usando dados embutidos.");
-            return response.text();
-        })
-        .then(csvTexto => {
-            parsearCSV(csvTexto);
-        })
-        .catch(() => {
-            // Se aberto diretamente do computador (file://), lê da tag embutida automaticamente
-            const csvEmbutido = document.getElementById("dadosCsvEmbutidos").textContent;
-            parsearCSV(csvEmbutido);
+        /*
+        =====================================================
+        INICIALIZAÇÃO AUTOMÁTICA
+        =====================================================
+        */
+        window.addEventListener("DOMContentLoaded", () => {
+            // Tenta carregar o ficheiro remoto caso esteja rodando num servidor web
+            fetch("servidores_full.csv")
+                .then(response => {
+                    if (!response.ok) throw new Error("Usando dados embutidos.");
+                    return response.text();
+                })
+                .then(csvTexto => {
+                    parsearCSV(csvTexto);
+                })
+                .catch(() => {
+                    // Se aberto diretamente do computador (file://), lê da tag embutida automaticamente
+                    const csvEmbutido = document.getElementById("dadosCsvEmbutidos").textContent;
+                    parsearCSV(csvEmbutido);
+                });
         });
-});
 
-/*
-=====================================================
-PARSE E CONSTRUÇÃO HIERÁRQUICA DO CSV
-=====================================================
-*/
-function parsearCSV(csvConteudo) {
-    Papa.parse(csvConteudo.trim(), {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: true,
-        complete: function(results) {
-            if (results.data && results.data.length > 0) {
-                processarRegistos(results.data);
-            }
-        }
-    });
-}
-
-function processarRegistos(rows) {
-    const nodesMap = {};
-
-    rows.forEach(row => {
-        const getVal = (possibleKeys) => {
-            for (let key of Object.keys(row)) {
-                if (possibleKeys.includes(key.trim().toLowerCase())) {
-                    return row[key] !== undefined && row[key] !== null ? String(row[key]).trim() : '';
+        /*
+        =====================================================
+        PARSE E CONSTRUÇÃO HIERÁRQUICA DO CSV
+        =====================================================
+        */
+        function parsearCSV(csvConteudo) {
+            Papa.parse(csvConteudo.trim(), {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true,
+                complete: function (results) {
+                    if (results.data && results.data.length > 0) {
+                        processarRegistos(results.data);
+                    }
                 }
-            }
-            return '';
-        };
+            });
+        }
 
-        const servidor = getVal(['nome_ascii', 'nome', 'servidor', 'funcionario']);
-        const u_id = getVal(['id_unidade', 'idunidade']);
-        const u_sigla = getVal(['sigla_unidade', 'siglaunidade', 'sigla']);
-        const u_nome = getVal(['unidade', 'nome_unidade']);
+        function processarRegistos(rows) {
+            const nodesMap = {};
 
-        const p_id = getVal(['id_unidade_responsavel', 'idunidaderesponsavel', 'id_pai']);
-        const p_sigla = getVal(['sigla_unidade_responsavel', 'siglaunidaderesponsavel', 'sigla_pai']);
-        const p_nome = getVal(['unidade_responsavel', 'unidaderesponsavel', 'nome_pai']);
-
-        if (!u_id && !p_id) return;
-
-        // Cria/atualiza o nó Pai
-        if (p_id) {
-            if (!nodesMap[p_id]) {
-                nodesMap[p_id] = {
-                    id: p_id,
-                    sigla: p_sigla || p_id,
-                    nome: p_nome || p_id,
-                    id_responsavel: null,
-                    servidores: [],
-                    filhos: []
+            rows.forEach(row => {
+                const getVal = (possibleKeys) => {
+                    for (let key of Object.keys(row)) {
+                        if (possibleKeys.includes(key.trim().toLowerCase())) {
+                            return row[key] !== undefined && row[key] !== null ? String(row[key]).trim() : '';
+                        }
+                    }
+                    return '';
                 };
-            } else {
-                if (p_sigla && !nodesMap[p_id].sigla) nodesMap[p_id].sigla = p_sigla;
-                if (p_nome && !nodesMap[p_id].nome) nodesMap[p_id].nome = p_nome;
-            }
+
+                const servidor = getVal(['nome_ascii', 'nome', 'servidor', 'funcionario']);
+                const u_id = getVal(['id_unidade', 'idunidade']);
+                const u_sigla = getVal(['sigla_unidade', 'siglaunidade', 'sigla']);
+                const u_nome = getVal(['unidade', 'nome_unidade']);
+
+                const p_id = getVal(['id_unidade_responsavel', 'idunidaderesponsavel', 'id_pai']);
+                const p_sigla = getVal(['sigla_unidade_responsavel', 'siglaunidaderesponsavel', 'sigla_pai']);
+                const p_nome = getVal(['unidade_responsavel', 'unidaderesponsavel', 'nome_pai']);
+
+                if (!u_id && !p_id) return;
+
+                // Cria/atualiza o nó Pai
+                if (p_id) {
+                    if (!nodesMap[p_id]) {
+                        nodesMap[p_id] = {
+                            id: p_id,
+                            sigla: p_sigla || p_id,
+                            nome: p_nome || p_id,
+                            id_responsavel: null,
+                            servidores: [],
+                            filhos: []
+                        };
+                    } else {
+                        if (p_sigla && !nodesMap[p_id].sigla) nodesMap[p_id].sigla = p_sigla;
+                        if (p_nome && !nodesMap[p_id].nome) nodesMap[p_id].nome = p_nome;
+                    }
+                }
+
+                // Cria/atualiza o nó Atual
+                if (u_id) {
+                    if (!nodesMap[u_id]) {
+                        nodesMap[u_id] = {
+                            id: u_id,
+                            sigla: u_sigla || u_id,
+                            nome: u_nome || u_id,
+                            id_responsavel: p_id || null,
+                            servidores: [],
+                            filhos: []
+                        };
+                    } else {
+                        if (p_id) nodesMap[u_id].id_responsavel = p_id;
+                        if (u_sigla) nodesMap[u_id].sigla = u_sigla;
+                        if (u_nome) nodesMap[u_id].nome = u_nome;
+                    }
+
+                    if (servidor) {
+                        nodesMap[u_id].servidores.push(servidor);
+                    }
+                }
+            });
+
+            // Encadeia os nós
+            const roots = [];
+            Object.keys(nodesMap).forEach(id => {
+                const node = nodesMap[id];
+                const p_id = node.id_responsavel;
+
+                if (p_id && nodesMap[p_id] && p_id !== id) {
+                    nodesMap[p_id].filhos.push(node);
+                } else {
+                    roots.push(node);
+                }
+            });
+
+            dadosOrganograma = (roots.length === 1) ? roots[0] : {
+                id: 'root',
+                sigla: 'GERAL',
+                nome: 'Organização',
+                id_responsavel: null,
+                servidores: [],
+                filhos: roots
+            };
+
+            renderizar();
+            calcularIndicadores();
+            centralizarOrganograma();
         }
 
-        // Cria/atualiza o nó Atual
-        if (u_id) {
-            if (!nodesMap[u_id]) {
-                nodesMap[u_id] = {
-                    id: u_id,
-                    sigla: u_sigla || u_id,
-                    nome: u_nome || u_id,
-                    id_responsavel: p_id || null,
-                    servidores: [],
-                    filhos: []
-                };
-            } else {
-                if (p_id) nodesMap[u_id].id_responsavel = p_id;
-                if (u_sigla) nodesMap[u_id].sigla = u_sigla;
-                if (u_nome) nodesMap[u_id].nome = u_nome;
+        /*
+        =====================================================
+        RENDERIZAÇÃO E CENTRALIZAÇÃO DO ORGANOGRAMA
+        =====================================================
+        */
+        function criarUnidadeElemento(unidade, nivel = 0) {
+            const li = document.createElement("li");
+            li.dataset.nome = (unidade.nome + " " + unidade.sigla).toLowerCase();
+            li.dataset.servidores = (unidade.servidores || []).join(" ").toLowerCase();
+
+            const card = document.createElement("div");
+            card.className = "unidade";
+            if (nivel === 0) {
+                card.classList.add("principal");
             }
 
-            if (servidor) {
-                nodesMap[u_id].servidores.push(servidor);
-            }
-        }
-    });
+            const id = "unidade-" + contadorIds++;
+            card.dataset.id = id;
 
-    // Encadeia os nós
-    const roots = [];
-    Object.keys(nodesMap).forEach(id => {
-        const node = nodesMap[id];
-        const p_id = node.id_responsavel;
+            const temFilhos = unidade.filhos && unidade.filhos.length > 0;
+            const simboloExpandir = temFilhos ? `<span class="expandir-btn">▼</span>` : "";
 
-        if (p_id && nodesMap[p_id] && p_id !== id) {
-            nodesMap[p_id].filhos.push(node);
-        } else {
-            roots.push(node);
-        }
-    });
+            const totalServidores = unidade.servidores ? unidade.servidores.length : 0;
 
-    dadosOrganograma = (roots.length === 1) ? roots[0] : {
-        id: 'root',
-        sigla: 'GERAL',
-        nome: 'Organização',
-        id_responsavel: null,
-        servidores: [],
-        filhos: roots
-    };
-
-    renderizar();
-    calcularIndicadores();
-    centralizarOrganograma();
-}
-
-/*
-=====================================================
-RENDERIZAÇÃO E CENTRALIZAÇÃO DO ORGANOGRAMA
-=====================================================
-*/
-function criarUnidadeElemento(unidade, nivel = 0) {
-    const li = document.createElement("li");
-    li.dataset.nome = (unidade.nome + " " + unidade.sigla).toLowerCase();
-    li.dataset.servidores = (unidade.servidores || []).join(" ").toLowerCase();
-
-    const card = document.createElement("div");
-    card.className = "unidade";
-    if (nivel === 0) {
-        card.classList.add("principal");
-    }
-
-    const id = "unidade-" + contadorIds++;
-    card.dataset.id = id;
-
-    const temFilhos = unidade.filhos && unidade.filhos.length > 0;
-    const simboloExpandir = temFilhos ? `<span class="expandir-btn">▼</span>` : "";
-
-    const totalServidores = unidade.servidores ? unidade.servidores.length : 0;
-
-    card.innerHTML = `
+            card.innerHTML = `
         ${simboloExpandir}
         <div class="sigla-unidade">${unidade.sigla}</div>
         <div class="nome-unidade">${unidade.nome}</div>
@@ -731,203 +1406,204 @@ function criarUnidadeElemento(unidade, nivel = 0) {
         <div class="legenda">servidores lotados</div>
     `;
 
-    card.addEventListener("click", function(event) {
-        if (event.target.classList.contains("expandir-btn")) {
-            event.stopPropagation();
-            const ul = li.querySelector(":scope > ul");
-            if (ul) {
-                const aberto = ul.style.display !== "none";
-                ul.style.display = aberto ? "none" : "flex";
-                event.target.textContent = aberto ? "▶" : "▼";
-                centralizarOrganograma();
+            card.addEventListener("click", function (event) {
+                if (event.target.classList.contains("expandir-btn")) {
+                    event.stopPropagation();
+                    const ul = li.querySelector(":scope > ul");
+                    if (ul) {
+                        const aberto = ul.style.display !== "none";
+                        ul.style.display = aberto ? "none" : "flex";
+                        event.target.textContent = aberto ? "▶" : "▼";
+                        centralizarOrganograma();
+                    }
+                    return;
+                }
+
+                abrirModalServidores(unidade);
+            });
+
+            li.appendChild(card);
+
+            if (temFilhos) {
+                const ul = document.createElement("ul");
+                unidade.filhos.forEach(filho => {
+                    const filhoElemento = criarUnidadeElemento(filho, nivel + 1);
+                    ul.appendChild(filhoElemento);
+                });
+                li.appendChild(ul);
             }
-            return;
+
+            return li;
         }
 
-        abrirModalServidores(unidade);
-    });
+        function renderizar() {
+            const container = document.getElementById("organograma");
+            container.innerHTML = "";
 
-    li.appendChild(card);
+            if (!dadosOrganograma) return;
 
-    if (temFilhos) {
-        const ul = document.createElement("ul");
-        unidade.filhos.forEach(filho => {
-            const filhoElemento = criarUnidadeElemento(filho, nivel + 1);
-            ul.appendChild(filhoElemento);
-        });
-        li.appendChild(ul);
-    }
+            contadorIds = 0;
+            const tree = document.createElement("ul");
+            tree.className = "tree";
 
-    return li;
-}
-
-function renderizar() {
-    const container = document.getElementById("organograma");
-    container.innerHTML = "";
-
-    if (!dadosOrganograma) return;
-
-    contadorIds = 0;
-    const tree = document.createElement("ul");
-    tree.className = "tree";
-
-    tree.appendChild(criarUnidadeElemento(dadosOrganograma));
-    container.appendChild(tree);
-    unidadeAtual = dadosOrganograma;
-    renderizarVisao();
-}
-
-function centralizarOrganograma() {
-    setTimeout(() => {
-        const container = document.querySelector('.organograma-container');
-        if (container) {
-            container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+            tree.appendChild(criarUnidadeElemento(dadosOrganograma));
+            container.appendChild(tree);
+            unidadeAtual = dadosOrganograma;
+            renderizarVisao();
         }
-    }, 100);
-}
 
-/*
-=====================================================
-POP-UP / MODAL DE SERVIDORES
-=====================================================
-*/
-function abrirModalServidores(unidade) {
-    const modal = document.getElementById("modalServidores");
-    const titulo = document.getElementById("modalNomeUnidade");
-    const subtitulo = document.getElementById("modalSubtitulo");
-    const conteudo = document.getElementById("modalConteudo");
+        function centralizarOrganograma() {
+            setTimeout(() => {
+                const container = document.querySelector('.organograma-container');
+                if (container) {
+                    container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+                }
+            }, 100);
+        }
 
-    titulo.textContent = `[${unidade.sigla}] ${unidade.nome}`;
-    
-    const servidores = unidade.servidores || [];
-    subtitulo.textContent = `Total: ${servidores.length} servidor(es) diretamente lotado(s)`;
+        /*
+        =====================================================
+        POP-UP / MODAL DE SERVIDORES
+        =====================================================
+        */
+        function abrirModalServidores(unidade) {
+            const modal = document.getElementById("modalServidores");
+            const titulo = document.getElementById("modalNomeUnidade");
+            const subtitulo = document.getElementById("modalSubtitulo");
+            const conteudo = document.getElementById("modalConteudo");
 
-    if (servidores.length === 0) {
-        conteudo.innerHTML = `<div class="vazio-msg">Nenhum servidor diretamente lotado nesta unidade.</div>`;
-    } else {
-        let htmlLista = `<ul class="lista-servidores">`;
-        servidores.forEach(s => {
-            htmlLista += `
+            titulo.textContent = `[${unidade.sigla}] ${unidade.nome}`;
+
+            const servidores = unidade.servidores || [];
+            subtitulo.textContent = `Total: ${servidores.length} servidor(es) diretamente lotado(s)`;
+
+            if (servidores.length === 0) {
+                conteudo.innerHTML = `<div class="vazio-msg">Nenhum servidor diretamente lotado nesta unidade.</div>`;
+            } else {
+                let htmlLista = `<ul class="lista-servidores">`;
+                servidores.forEach(s => {
+                    htmlLista += `
                 <li class="item-servidor">
                     <span class="icone-servidor">👤</span>
                     <span><strong>${escapeHtml(s)}</strong></span>
                 </li>
             `;
-        });
-        htmlLista += `</ul>`;
-        conteudo.innerHTML = htmlLista;
-    }
-
-    modal.classList.add("ativo");
-}
-
-function fecharModal() {
-    document.getElementById("modalServidores").classList.remove("ativo");
-}
-
-window.addEventListener("click", function(e) {
-    const modal = document.getElementById("modalServidores");
-    if (e.target === modal) {
-        fecharModal();
-    }
-});
-
-window.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") {
-        fecharModal();
-    }
-});
-
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
-
-/*
-=====================================================
-INDICADORES
-=====================================================
-*/
-function obterTodasUnidades(unidade) {
-    let resultado = [unidade];
-    if (unidade.filhos) {
-        unidade.filhos.forEach(filho => {
-            resultado = resultado.concat(obterTodasUnidades(filho));
-        });
-    }
-    return resultado;
-}
-
-function calcularIndicadores() {
-    if (!dadosOrganograma) return;
-
-    const unidades = obterTodasUnidades(dadosOrganograma);
-
-    document.getElementById("totalUnidades").textContent = unidades.length;
-
-    const totalServidores = unidades.reduce((soma, u) => soma + (u.servidores ? u.servidores.length : 0), 0);
-    document.getElementById("totalColaboradores").textContent = totalServidores;
-
-    document.getElementById("totalDepartamentos").textContent = dadosOrganograma.filhos ? dadosOrganograma.filhos.length : 0;
-}
-
-/*
-=====================================================
-EXPANDIR, RECOLHER E PESQUISAR
-=====================================================
-*/
-function expandirTodos() {
-    document.querySelectorAll(".tree ul").forEach(ul => ul.style.display = "flex");
-    document.querySelectorAll(".expandir-btn").forEach(btn => btn.textContent = "▼");
-    centralizarOrganograma();
-}
-
-function recolherTodos() {
-    document.querySelectorAll(".tree li ul").forEach(ul => ul.style.display = "none");
-    document.querySelectorAll(".expandir-btn").forEach(btn => btn.textContent = "▶");
-    centralizarOrganograma();
-}
-
-document.getElementById("campoBusca").addEventListener("input", function() {
-    const termo = this.value.toLowerCase().trim();
-    const itens = document.querySelectorAll(".tree li");
-
-    itens.forEach(item => item.classList.remove("encontrado"));
-
-    if (!termo) return;
-
-    itens.forEach(item => {
-        const nome = item.dataset.nome || "";
-        const servidores = item.dataset.servidores || "";
-
-        if (nome.includes(termo) || servidores.includes(termo)) {
-            item.classList.add("encontrado");
-
-            let pai = item.parentElement?.closest("li");
-            while (pai) {
-                const ul = pai.querySelector(":scope > ul");
-                if (ul) ul.style.display = "flex";
-                pai = pai.parentElement?.closest("li");
+                });
+                htmlLista += `</ul>`;
+                conteudo.innerHTML = htmlLista;
             }
-        }
-    });
-});
 
-/* Busca da nova interface */
-document.addEventListener("DOMContentLoaded", () => {
-    const campo = document.getElementById("campoBusca");
-    if (campo) {
-        campo.addEventListener("input", e => aplicarBuscaNova(e.target.value));
-    }
-    document.addEventListener("click", e => {
-        const box = document.getElementById("resultadosBusca");
-        const wrap = document.querySelector(".search-wrap");
-        if (box && wrap && !wrap.contains(e.target)) box.classList.remove("visivel");
-    });
-});
-</script>
+            modal.classList.add("ativo");
+        }
+
+        function fecharModal() {
+            document.getElementById("modalServidores").classList.remove("ativo");
+        }
+
+        window.addEventListener("click", function (e) {
+            const modal = document.getElementById("modalServidores");
+            if (e.target === modal) {
+                fecharModal();
+            }
+        });
+
+        window.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                fecharModal();
+            }
+        });
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        /*
+        =====================================================
+        INDICADORES
+        =====================================================
+        */
+        function obterTodasUnidades(unidade) {
+            let resultado = [unidade];
+            if (unidade.filhos) {
+                unidade.filhos.forEach(filho => {
+                    resultado = resultado.concat(obterTodasUnidades(filho));
+                });
+            }
+            return resultado;
+        }
+
+        function calcularIndicadores() {
+            if (!dadosOrganograma) return;
+
+            const unidades = obterTodasUnidades(dadosOrganograma);
+
+            document.getElementById("totalUnidades").textContent = unidades.length;
+
+            const totalServidores = unidades.reduce((soma, u) => soma + (u.servidores ? u.servidores.length : 0), 0);
+            document.getElementById("totalColaboradores").textContent = totalServidores;
+
+            document.getElementById("totalDepartamentos").textContent = dadosOrganograma.filhos ? dadosOrganograma.filhos.length : 0;
+        }
+
+        /*
+        =====================================================
+        EXPANDIR, RECOLHER E PESQUISAR
+        =====================================================
+        */
+        function expandirTodos() {
+            document.querySelectorAll(".tree ul").forEach(ul => ul.style.display = "flex");
+            document.querySelectorAll(".expandir-btn").forEach(btn => btn.textContent = "▼");
+            centralizarOrganograma();
+        }
+
+        function recolherTodos() {
+            document.querySelectorAll(".tree li ul").forEach(ul => ul.style.display = "none");
+            document.querySelectorAll(".expandir-btn").forEach(btn => btn.textContent = "▶");
+            centralizarOrganograma();
+        }
+
+        document.getElementById("campoBusca").addEventListener("input", function () {
+            const termo = this.value.toLowerCase().trim();
+            const itens = document.querySelectorAll(".tree li");
+
+            itens.forEach(item => item.classList.remove("encontrado"));
+
+            if (!termo) return;
+
+            itens.forEach(item => {
+                const nome = item.dataset.nome || "";
+                const servidores = item.dataset.servidores || "";
+
+                if (nome.includes(termo) || servidores.includes(termo)) {
+                    item.classList.add("encontrado");
+
+                    let pai = item.parentElement?.closest("li");
+                    while (pai) {
+                        const ul = pai.querySelector(":scope > ul");
+                        if (ul) ul.style.display = "flex";
+                        pai = pai.parentElement?.closest("li");
+                    }
+                }
+            });
+        });
+
+        /* Busca da nova interface */
+        document.addEventListener("DOMContentLoaded", () => {
+            const campo = document.getElementById("campoBusca");
+            if (campo) {
+                campo.addEventListener("input", e => aplicarBuscaNova(e.target.value));
+            }
+            document.addEventListener("click", e => {
+                const box = document.getElementById("resultadosBusca");
+                const wrap = document.querySelector(".search-wrap");
+                if (box && wrap && !wrap.contains(e.target)) box.classList.remove("visivel");
+            });
+        });
+    </script>
 </body>
+
 </html>
